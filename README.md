@@ -1,2 +1,2 @@
-# m2m-api
-API to search and download data using Machine-to-Machine (M2M) API from USGS.
+# Machine-to-Machine (M2M) API
+API to search and download data using Machine-to-Machine (M2M) API from USGS (https://m2m.cr.usgs.gov/).
