@@ -3,7 +3,17 @@ Machine-to-Machine (M2M) Python API
 
 Python interface to use functionalities from the new Machine-to-Machine (M2M) `USGS API <https://m2m.cr.usgs.gov/>`__.
 
-The functionalities currently implemented are from endpoints: *login*, *dataset-search*, *dataset-filters*, *scene-search*, and *logout*.
+The functionalities currently implemented are from endpoints: *login*, *dataset-search*, *dataset-filters*, *scene-search*, *permissions*, and *logout*.
+
+For ordering and downloading data from USGS, one need to request access at https://ers.cr.usgs.gov/profile/access doing:
+  
+1) Login to your USGS account.
+2) Press *Request Access* bottom.
+3) Select *MACHINE* access type. 
+4) Fill survey about data use.
+5) Wait a couple of days before acceptance.
+
+Once request access is accepted, permissions should return ["download", "order"].
 
 Connect to the M2M USGS API
 ---------------------------
@@ -15,6 +25,15 @@ The interface will prompt to the user to specify the username (or email) and the
   from api import M2M
   m2m = M2M()
   
+Look at your M2M USGS API permissions
+-------------------------------------
+
+When the interface is initialized, it automatically looks at your permissions. So, the permissions is already an attribute of the object.
+
+.. code:: python
+
+  m2m.permissions
+
 
 Search for all available USGS datasets
 --------------------------------------
