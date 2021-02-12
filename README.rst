@@ -18,12 +18,19 @@ Once request access is accepted, permissions should return ['download', 'order']
 Connect to the M2M USGS API
 ---------------------------
 
-The interface will prompt to the user to specify the username (or email) and the password. It can also be specified when initializing the object using paramaters *username* and *password*.
+The interface will prompt to the user to specify the username (or email) and the password.
 
 .. code:: python
 
   from api import M2M
   m2m = M2M()
+  
+It can also be specified when initializing the object using paramaters *username* and *password*.
+
+.. code:: python
+
+  from api import M2M
+  m2m = M2M(username, password)
   
 By default, the stable version of the M2M USGS API is used. To use another version, one can define *version* as string doing:
 
