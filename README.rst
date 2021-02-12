@@ -3,13 +3,7 @@ Machine-to-Machine (M2M) Python API
 
 Python interface to use functionalities from the new Machine-to-Machine (M2M) `USGS API <https://m2m.cr.usgs.gov/>`__.
 
-The functionalities currently implemented are from endpoints:
-
-- login
-- dataset-search
-- dataset-filters
-- scene-search
-- logout
+The functionalities currently implemented are from endpoints: *login*, *dataset-search*, *dataset-filters*, *scene-search*, and *logout*.
 
 Examples
 --------
@@ -40,10 +34,38 @@ If you need more information for every dataset, you can also search all the data
 
   datasets = m2m.searchDatasets()
   
+wich provides metadata for every dataset.
+
+Search for all available filters for a specific USGS dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can look for specific metadata filters that you can apply to a specfic dataset doing:
+
+.. code:: python
+
+  datasetFilters = m2m.datasetFilters(datasetName="landsat_ot_c2_l1")
+
+which returns a metadata with all the possible filters that one can apply to the metadata of this specific dataset. To then filter by this metadata, you can use *metadataInfo* explained in the next sections.
+
 Send a spatio-temporal query to the USGS API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-# By boundingBox
+You can search for scenes using different parameters. The parameters currently implemented on the interface are:
+
+- *datasetName*:
+- *startDate*:
+- *endDate*:
+- *maxResults*
+- *boundingBox*:
+- *geoJsonType*:
+- *geoJsonCoords*:
+- *geoJsonPath*:
+- *minCC*:
+- *maxCC*:
+- *includeUnknownCC*:
+- *metadataInfo*:
+
+By boundingBox
 
 .. code:: python
 
