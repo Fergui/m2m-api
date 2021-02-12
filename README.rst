@@ -93,6 +93,19 @@ Metadata information dictionary starts with an "and" or "or" field containing a 
     * *'value'*: Field Value is a single value (format depends on the data format of the metadata field).
     * *'between'*: Field Value is a list of two values (format depends on the data format of the metadata field).
 
+Example: 
+
+.. code:: python
+
+  "metadataInfo": {
+          "and": [
+              ('Sensor Identifier','value','OLI_TIRS'),
+              ('Data Type L1','value','L1TP'),
+              ('Collection Category','value','T1')
+          ]
+   }
+
+
 **Search by a Bounding Box**
 
 .. code:: python
