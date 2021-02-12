@@ -89,9 +89,44 @@ You can search for scenes using different parameters. The parameters currently i
         "datasetName": "landsat_ot_c2_l1",
         "startDate": "2020-08-01",
         "endDate": "2020-08-31",
-        "boundingBox": (-126.47175275298368, -112.426440180154,
-                        32.13566490555765, 42.399334704429755),
+        "boundingBox": (-126.471753, -112.426439, 
+                        32.135664, 42.399335),
         "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
   
+  
+**Search by geoJson information**
+
+.. code:: python
+
+  params = {
+        "datasetName": "landsat_ot_c2_l1",
+        "startDate": "2020-08-01",
+        "endDate": "2020-08-31",
+        "geoJsonType": "Polygon",
+        "geoJsonCoords": [[[-126.471753, 32.135664], 
+                           [-126.471753, 42.399335], 
+                           [-112.426439, 42.399335], 
+                           [-112.426439, 32.135664], 
+                           [-126.471753, 32.135664]]],
+        "maxResults": 10000
+  }
+  scenes = m2m.searchScenes(**params)
+ 
+**Search by geoJson file**
+
+.. code:: python
+
+  params = {
+        "datasetName": "landsat_ot_c2_l1",
+        "startDate": "2020-08-01",
+        "endDate": "2020-08-31",
+        "geoJsonPath": "geojson_files/california.geojson",
+        "maxResults": 10000
+  }
+  scenes = m2m.searchScenes(**params)
+  
+**Search by metadata info**
+
+
