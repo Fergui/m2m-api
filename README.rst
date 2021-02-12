@@ -81,7 +81,7 @@ You can search for scenes using different parameters. The parameters currently i
 +--------------------+---------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
-**Search by boundingBox**
+**Search by a Bounding Box**
 
 .. code:: python
 
@@ -94,9 +94,9 @@ You can search for scenes using different parameters. The parameters currently i
         "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
+  print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
   
-  
-**Search by geoJson information**
+**Search by GeoJson information**
 
 .. code:: python
 
@@ -113,8 +113,9 @@ You can search for scenes using different parameters. The parameters currently i
         "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
+  print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
  
-**Search by geoJson file**
+**Search by GeoJson file**
 
 .. code:: python
 
@@ -126,7 +127,19 @@ You can search for scenes using different parameters. The parameters currently i
         "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
+  print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
   
-**Search by metadata info**
+**Search by Cloud Cover range**
 
+.. code:: python
+
+  params = {
+
+  }
+  scenes = m2m.searchScenes(**params)
+  print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
+  cloudCovers = [float(r['cloudCover']) for r in scenes['results']]
+  print("{} - {} hits - {} returned - min_cc={} - max_cc={}".format(datasetName,scenes['totalHits'],scenes['recordsReturned'],min(cloudCovers),max(cloudCovers)))
+
+**Search by Metadata information**
 
