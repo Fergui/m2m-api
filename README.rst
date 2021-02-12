@@ -13,7 +13,7 @@ For ordering and downloading data from USGS, one need to request access at https
 4) Fill survey about data use.
 5) Wait a couple of days before acceptance.
 
-Once request access is accepted, permissions should return ["download", "order"].
+Once request access is accepted, permissions should return ['download', 'order'].
 
 Connect to the M2M USGS API
 ---------------------------
