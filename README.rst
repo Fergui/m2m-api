@@ -47,15 +47,18 @@ You can look for specific metadata filters that you can apply to a specfic datas
 
 which returns a metadata with all the possible filters that one can apply to the metadata of this specific dataset. To then filter by this metadata, you can use *metadataInfo* explained in the next sections.
 
-Send a spatio-temporal query to the USGS API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Search scenes by parameters using the USGS API
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can search for scenes using different parameters. The parameters currently implemented on the interface are:
 
-- *datasetName*:
-- *startDate*:
-- *endDate*:
-- *maxResults*
+| **Parameters** |             Format             | Description                                                                                         |
+| -------------  |:------------------------------:| --------------------------------------------------------------------------------------------------- |
+| *datasetName*  |             String             | Name of the USGS dataset. To search for what are the available datasets, look at previous sections. |
+| *startDate*    | String ISO 8601 Formatted Date | Start date of acquisition.                                                                          |
+| *endDate*      | String ISO 8601 Formatted Date | End date of acquisition.                                                                            |
+
+- *maxResults*: 
 - *boundingBox*:
 - *geoJsonType*:
 - *geoJsonCoords*:
