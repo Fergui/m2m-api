@@ -1,4 +1,6 @@
 import time
+import json
+import os.path as osp
 
 def dateCorrection(startDate,endDate):
     if startDate is None:
@@ -32,21 +34,40 @@ class Filter(dict):
                 datasetId = args.get(elem,None)
                 params.update(self.datasetId(datasetId))
             elif elem == 'temporalFilter':  
-                startDate = args.get('startDate',None)
-                endDate = args.get('endDate',None)
-                params.update(self.temporalFilter(startDate,endDate))
+                kargs = {
+                    'startDate': args.get('startDate',None),
+                    'endDate': args.get('endDate',None)
+                }
+                params.update(self.temporalFilter(**kargs))
             elif elem == 'acquisitionFilter':
-                startDate = args.get('startDate',None)
-                endDate = args.get('endDate',None)
-                params.update(self.acquisitionFilter(startDate,endDate))
+                kargs = {
+                    'startDate': args.get('startDate',None),
+                    'endDate': args.get('endDate',None)
+                }
+                params.update(self.acquisitionFilter(**kargs))
             elif elem == 'spatialFilter':
-                bbox = args.get('bbox',None)
-                params.update(self.spatialFilter(bbox))
+                kargs = {
+                    'boundingBox': args.get('boundingBox',None),
+                    'geoJsonType': args.get('geoJsonType',None),
+                    'geoJsonCoords': args.get('geoJsonCoords',None),
+                    'geoJsonPath': args.get('geoJsonPath',None)
+                }
+                params.update(self.spatialFilter(**kargs))
             elif elem == 'sceneFilter':
-                startDate = args.get('startDate',None)
-                endDate = args.get('endDate',None)
-                bbox = args.get('bbox',None)
-                params.update(self.sceneFilter(startDate,endDate,bbox))
+                kargs = {
+                    'startDate': args.get('startDate',None),
+                    'endDate': args.get('endDate',None),
+                    'boundingBox': args.get('boundingBox',None),
+                    'geoJsonType': args.get('geoJsonType',None),
+                    'geoJsonCoords': args.get('geoJsonCoords',None),
+                    'geoJsonPath': args.get('geoJsonPath',None),
+                    'minCC': args.get('minCC',None),
+                    'maxCC': args.get('maxCC',None),
+                    'includeUnknownCC': args.get('includeUnknownCC',None),
+                    'metadataInfo': args.get('metadataInfo',{}),
+                    'datasetFilters': args.get('datasetFilters',[])
+                }
+                params.update(self.sceneFilter(**kargs))
         return params
 
     @staticmethod
@@ -84,22 +105,43 @@ class Filter(dict):
         }
 
     @staticmethod
-    def spatialFilter(bbox):
-        if bbox is None:
-            return {}
-        return {
-            'spatialFilter': {
-                'filterType': "mbr",
-                'lowerLeft': {
-                    'latitude': bbox[2], 
-                    'longitude': bbox[0]
-                },
-                'upperRight': {
-                    'latitude': bbox[3], 
-                    'longitude': bbox[1]
+    def spatialFilter(boundingBox,geoJsonType,geoJsonCoords,geoJsonPath):
+        if geoJsonPath is None:
+            if geoJsonType is None:
+                if boundingBox is None:
+                    spatialFilter = {}
+                else:
+                    spatialFilter = {
+                        'filterType': "mbr",
+                        'lowerLeft': {
+                            'latitude': boundingBox[2], 
+                            'longitude': boundingBox[0]
+                        },
+                        'upperRight': {
+                            'latitude': boundingBox[3], 
+                            'longitude': boundingBox[1]
+                        }
+                    }
+            else:
+                spatialFilter = {
+                    'filterType': "geojson",
+                    'geoJson': {
+                        'type': geoJsonType,
+                        'coordinates': geoJsonCoords
+                    }
                 }
+        else:
+            spatialFilter = {
+                'filterType': "geojson",
+                'geoJson': json.load(open(osp.join(osp.dirname(__file__),geoJsonPath),'r'))
             }
-        }
+
+        if len(spatialFilter):
+            return {
+                'spatialFilter': spatialFilter
+            }
+        else:
+            return {}
 
     @staticmethod
     def acquisitionFilter(startDate,endDate):
@@ -111,10 +153,65 @@ class Filter(dict):
             }
         }
 
-    def sceneFilter(self,startDate,endDate,bbox):
+    @staticmethod
+    def cloudCoverFilter(minCC,maxCC,includeUnknownCC):
+        cloudCoverFilter = {}
+        if minCC is not None:
+            cloudCoverFilter.update({'min': minCC})
+        if maxCC is not None:
+            cloudCoverFilter.update({'max': maxCC})
+        if includeUnknownCC is not None:
+            cloudCoverFilter.update({'includeUnknown': includeUnknownCC})
+        if len(cloudCoverFilter):
+            return {
+                'cloudCoverFilter': cloudCoverFilter
+            }
+        else:
+            return {}
+
+    @staticmethod
+    def metadataFilter(datasetFilters,metadataInfo):
+        if len(metadataInfo): 
+            if 'and' in metadataInfo and len(metadataInfo['and']): 
+                metadataInfo = metadataInfo['and']
+                metadataFilter = {
+                    'filterType': 'and'
+                } 
+            elif 'or' in metadataInfo and len(metadataInfo['or']):
+                metadataInfo = metadataInfo['or']
+                metadataFilter = {
+                    'filterType': 'or'
+                }
+            else:
+                return {}
+            metadataFilter.update({'childFilters': []})
+            for metaName,metaType,metaValue in metadataInfo:
+                metaInfo = [df for df in datasetFilters if df['fieldLabel'] == metaName][0]
+                childFilter = {
+                    'filterId': metaInfo['id'],
+                    'filterType': metaType,
+                }
+                if metaType == 'value':
+                    childFilter.update({'value': metaValue, 
+                                        'operand': '='})
+                elif metaType == 'between':
+                    childFilter.update({'firstValue': metaValue[0], 
+                                        'secondValue': metaValue[1]})
+                metadataFilter['childFilters'].append(childFilter)
+            return {
+                'metadataFilter': metadataFilter
+            }
+        else:
+            return {}
+
+    def sceneFilter(self,startDate,endDate,boundingBox,geoJsonType,geoJsonCoords,geoJsonPath,minCC,maxCC,includeUnknownCC,metadataInfo,datasetFilters):
         sceneFilter = {}
         sceneFilter.update(self.acquisitionFilter(startDate,endDate))
-        sceneFilter.update(self.spatialFilter(bbox))
+        sceneFilter.update(self.cloudCoverFilter(minCC,maxCC,includeUnknownCC))
+        sceneFilter.update(self.spatialFilter(boundingBox,geoJsonType,geoJsonCoords,geoJsonPath))
+        sceneFilter.update(self.metadataFilter(datasetFilters,metadataInfo))
+
         return {
             'sceneFilter': sceneFilter
         }
+
