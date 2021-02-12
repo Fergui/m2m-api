@@ -137,7 +137,6 @@ You can search for scenes using different parameters. The parameters currently i
 
   }
   scenes = m2m.searchScenes(**params)
-  print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
   cloudCovers = [float(r['cloudCover']) for r in scenes['results']]
   print("{} - {} hits - {} returned - min_cc={} - max_cc={}".format(datasetName, scenes['totalHits'],
                                                                     scenes['recordsReturned'],
