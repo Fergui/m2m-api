@@ -65,7 +65,7 @@ You can search for scenes using different parameters. The parameters currently i
 - *includeUnknownCC*:
 - *metadataInfo*:
 
-* Search by boundingBox
+** Search by boundingBox **
 
 .. code:: python
 
