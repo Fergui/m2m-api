@@ -134,7 +134,13 @@ You can search for scenes using different parameters. The parameters currently i
 .. code:: python
 
   params = {
-
+        "startDate": "2020-08-01",
+        "endDate": "2020-08-31",
+        "geoJsonPath": "geojson_files/california.geojson",
+        "minCC": 10,
+        "maxCC": 70,
+        "includeUnknownCC": False,
+        "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
   cloudCovers = [float(r['cloudCover']) for r in scenes['results']]
