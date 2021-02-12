@@ -28,7 +28,6 @@ class M2M(object):
         self.login(password)
         allDatasets = self.sendRequest('dataset-search')
         self.datasetNames = [dataset['datasetAlias'] for dataset in allDatasets]
-        self.datasetIds = [dataset['datasetId'] for dataset in allDatasets]
         self.permissions = self.sendRequest('permissions')
 
     def sendRequest(self, endpoint, data={}, max_retries=5):
@@ -106,7 +105,7 @@ def retry_connect(url, json_data, headers={}, max_retries=5, sleep_seconds=1):
             response = requests.post(url, json_data, headers=headers, timeout=5)
         except:
             retries += 1
-            logging.warning('Connection Timeout - retry number {} of {}'.format(retries,max_retries))
+            logging.info('Connection Timeout - retry number {} of {}'.format(retries,max_retries))
             sec = random.random() * sleep_seconds
             time.sleep(sec)
         else:
