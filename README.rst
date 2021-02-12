@@ -6,16 +6,18 @@ Python interface to use functionalities from the new Machine-to-Machine (M2M) `U
 The functionalities currently implemented are from endpoints:
 
 - login
-- logout
 - dataset-search
 - dataset-filters
 - scene-search
+- logout
 
 Example
 -------
 
 Connect to the M2M USGS API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The interface will prompt to the user to specify the username (or email) and the password. It can also be specified when initializing the object using paramaters *username* and *password*.
 
 .. code:: python
 
