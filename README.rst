@@ -1,4 +1,5 @@
-# Machine-to-Machine (M2M) Python API
+Machine-to-Machine (M2M) Python API
+===================================
 
 Python interface to use functionalities from the new Machine-to-Machine (M2M) `USGS API <https://m2m.cr.usgs.gov/>`__.
 
