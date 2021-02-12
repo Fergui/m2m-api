@@ -52,11 +52,21 @@ Search scenes by parameters using the USGS API
 
 You can search for scenes using different parameters. The parameters currently implemented on the interface are:
 
-| **Parameters** |             Format             | Description                                                                                         |
-| -------------  |:------------------------------:| --------------------------------------------------------------------------------------------------- |
-| *datasetName*  |             String             | Name of the USGS dataset. To search for what are the available datasets, look at previous sections. |
-| *startDate*    | String ISO 8601 Formatted Date | Start date of acquisition.                                                                          |
-| *endDate*      | String ISO 8601 Formatted Date | End date of acquisition.                                                                            |
+
++------------------+--------------------------------------+-----------------------------------------------------------------------------------------------------+
+| **Parameters**   |              **Format**              | **Description**                                                                                     |
++==================+======================================+=====================================================================================================+
+| *datasetName*    |                String                | Name of the USGS dataset. To search for what are the available datasets, look at previous sections. |               
++------------------+--------------------------------------+-----------------------------------------------------------------------------------------------------+
+| *startDate*      |       ISO 8601 Formatted Date        | Start date of acquisition.                                                                          |
++------------------+--------------------------------------+-----------------------------------------------------------------------------------------------------+
+| *endDate*        |       ISO 8601 Formatted Date        | End date of acquisition.                                                                            |
++------------------+--------------------------------------+-----------------------------------------------------------------------------------------------------+
+| *datasetName*    |                String                |                                                                                                     |
++------------------+--------------------------------------+-----------------------------------------------------------------------------------------------------+
+| *datasetName*    |                String                |                                                                                                     |
++------------------+--------------------------------------+-----------------------------------------------------------------------------------------------------+
+
 
 - *maxResults*: 
 - *boundingBox*:
