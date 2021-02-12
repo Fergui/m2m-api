@@ -80,18 +80,27 @@ You can search for scenes using different parameters. The parameters currently i
 | *metadataInfo*     |                   Dictionary                | Dictionary with information about filtering from metadata. More information in next sections.                                                                                                                              |
 +--------------------+---------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
+Metadata information dictionary starts with an "and" or "or" field containing a list of tuples. Each tuple has size 3 and represents one metadata filter condition. To know what metadata filters are available for a specific dataset, look at the previous section. Each metadata filter contains
+
+- *Field Name*: Name of the metadata filter (fieldLabel field in datasetFilters).
+- *Field Type*: Type of metadata filter. Options are: 
+    - 'value': set a specific value.
+    - 'between': set a range of values.
+- *Field Value*: Value of the metadata filter. Depending on the Field Type:
+    - If 'value': Field Value is a single value (format depends on the data format of the metadata field).
+    - If 'between': Field Value is a list of two values (format depends on the data format of the metadata field).
 
 **Search by a Bounding Box**
 
 .. code:: python
 
   params = {
-        "datasetName": "landsat_ot_c2_l1",
-        "startDate": "2020-08-01",
-        "endDate": "2020-08-31",
-        "boundingBox": (-126.471753, -112.426439, 
-                        32.135664, 42.399335),
-        "maxResults": 10000
+      "datasetName": "landsat_ot_c2_l1",
+      "startDate": "2020-08-01",
+      "endDate": "2020-08-31",
+      "boundingBox": (-126.471753, -112.426439, 
+                      32.135664, 42.399335),
+      "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
@@ -101,16 +110,16 @@ You can search for scenes using different parameters. The parameters currently i
 .. code:: python
 
   params = {
-        "datasetName": "landsat_ot_c2_l1",
-        "startDate": "2020-08-01",
-        "endDate": "2020-08-31",
-        "geoJsonType": "Polygon",
-        "geoJsonCoords": [[[-126.471753, 32.135664], 
-                           [-126.471753, 42.399335], 
-                           [-112.426439, 42.399335], 
-                           [-112.426439, 32.135664], 
-                           [-126.471753, 32.135664]]],
-        "maxResults": 10000
+      "datasetName": "landsat_ot_c2_l1",
+      "startDate": "2020-08-01",
+      "endDate": "2020-08-31",
+      "geoJsonType": "Polygon",
+      "geoJsonCoords": [[[-126.471753, 32.135664], 
+                         [-126.471753, 42.399335], 
+                         [-112.426439, 42.399335], 
+                         [-112.426439, 32.135664], 
+                         [-126.471753, 32.135664]]],
+      "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
@@ -120,11 +129,11 @@ You can search for scenes using different parameters. The parameters currently i
 .. code:: python
 
   params = {
-        "datasetName": "landsat_ot_c2_l1",
-        "startDate": "2020-08-01",
-        "endDate": "2020-08-31",
-        "geoJsonPath": "geojson_files/california.geojson",
-        "maxResults": 10000
+      "datasetName": "landsat_ot_c2_l1",
+      "startDate": "2020-08-01",
+      "endDate": "2020-08-31",
+      "geoJsonPath": "geojson_files/california.geojson",
+      "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
@@ -134,13 +143,14 @@ You can search for scenes using different parameters. The parameters currently i
 .. code:: python
 
   params = {
-        "startDate": "2020-08-01",
-        "endDate": "2020-08-31",
-        "geoJsonPath": "geojson_files/california.geojson",
-        "minCC": 10,
-        "maxCC": 70,
-        "includeUnknownCC": False,
-        "maxResults": 10000
+      "datasetName": "landsat_ot_c2_l1",
+      "startDate": "2020-08-01",
+      "endDate": "2020-08-31",
+      "geoJsonPath": "geojson_files/california.geojson",
+      "minCC": 10,
+      "maxCC": 70,
+      "includeUnknownCC": False,
+      "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
   cloudCovers = [float(r['cloudCover']) for r in scenes['results']]
@@ -149,4 +159,23 @@ You can search for scenes using different parameters. The parameters currently i
                                                                     min(cloudCovers),max(cloudCovers)))
 
 **Search by Metadata information**
+
+.. code:: python
+
+  params = {
+      "datasetName": "landsat_ot_c2_l1",
+      "startDate": "2020-08-01",
+      "endDate": "2020-08-31",
+      "geoJsonPath": "geojson_files/california.geojson",
+      "metadataInfo": {
+          "and": [
+              ('Sensor Identifier','value','OLI_TIRS'),
+              ('Data Type L1','value','L1TP'),
+              ('Collection Category','value','T1')
+          ]
+      },
+      "maxResults": 10000
+  }
+  scenes = m2m.searchScenes(**params)
+  print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
 
