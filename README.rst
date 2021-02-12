@@ -5,11 +5,8 @@ Python interface to use functionalities from the new Machine-to-Machine (M2M) `U
 
 The functionalities currently implemented are from endpoints: *login*, *dataset-search*, *dataset-filters*, *scene-search*, and *logout*.
 
-Examples
---------
-
 Connect to the M2M USGS API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------
 
 The interface will prompt to the user to specify the username (or email) and the password. It can also be specified when initializing the object using paramaters *username* and *password*.
 
@@ -20,7 +17,7 @@ The interface will prompt to the user to specify the username (or email) and the
   
 
 Search for all available USGS datasets
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 
 When the interface is initialized, it automatically search for all the datasets. So, the name of all the datasets is already an attribute of the object.
 
@@ -37,7 +34,7 @@ If you need more information for every dataset, you can also search all the data
 wich provides metadata for every dataset.
 
 Search for all available filters for a specific USGS dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------------
 
 You can look for specific metadata filters that you can apply to a specfic dataset doing:
 
@@ -48,7 +45,7 @@ You can look for specific metadata filters that you can apply to a specfic datas
 which returns a metadata with all the possible filters that one can apply to the metadata of this specific dataset. To then filter by this metadata, you can use *metadataInfo* explained in the next sections.
 
 Search scenes by parameters using the USGS API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------------------
 
 You can search for scenes using different parameters. The parameters currently implemented on the interface are:
 
@@ -106,7 +103,8 @@ Example:
    }
 
 
-**Search by a Bounding Box**
+Search by a Bounding Box
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -121,7 +119,8 @@ Example:
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
   
-**Search by GeoJson information**
+Search by GeoJson information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -140,7 +139,8 @@ Example:
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
  
-**Search by GeoJson file**
+Search by GeoJson file
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -154,7 +154,8 @@ Example:
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
   
-**Search by Cloud Cover range**
+Search by Cloud Cover range
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -174,7 +175,8 @@ Example:
                                                                     scenes['recordsReturned'],
                                                                     min(cloudCovers),max(cloudCovers)))
 
-**Search by Metadata information**
+Search by Metadata information
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
