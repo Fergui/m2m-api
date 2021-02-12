@@ -216,3 +216,12 @@ Search by Metadata information
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
 
+
+Cutom M2M USGS API request
+--------------------------
+
+To make a custom request to the M2M USGS API, one needs to define the *endpoint* which is the endpoint string. Possible string endpoints can be found at `here<https://m2m.cr.usgs.gov/api/docs/reference/>`__. Most endpoints need some data which can be defined using a python dictionary. The dictionary can be created using the test application of the M2M USGS API `here<https://m2m.cr.usgs.gov/api/test/json/>`__.
+
+.. code:: python
+
+  m2m.sendRequest(endpoint,data)
