@@ -11,8 +11,8 @@ The functionalities currently implemented are from endpoints:
 - scene-search
 - logout
 
-Example
--------
+Examples
+--------
 
 Connect to the M2M USGS API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -28,10 +28,17 @@ The interface will prompt to the user to specify the username (or email) and the
 Search for all available USGS datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+When the interface is initialized, it automatically search for all the datasets. So, the name of all the datasets is already an attribute of the object.
+
 .. code:: python
   
   m2m.datasetNames
   
+If you need more information for every dataset, you can also search all the datasets doing:
+
+.. code:: python
+
+  datasets = m2m.searchDatasets()
   
 Send a spatio-temporal query to the USGS API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
