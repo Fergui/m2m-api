@@ -82,13 +82,16 @@ You can search for scenes using different parameters. The parameters currently i
 
 Metadata information dictionary starts with an "and" or "or" field containing a list of tuples. Each tuple has size 3 and represents one metadata filter condition. To know what metadata filters are available for a specific dataset, look at the previous section. Each metadata filter contains
 
-- *Field Name*: Name of the metadata filter (fieldLabel field in datasetFilters).
-- *Field Type*: Type of metadata filter. Options are: 
-  - 'value': set a specific value.
-  - 'between': set a range of values.
-- *Field Value*: Value of the metadata filter. Depending on the *Field Type*:
-  - If 'value': *Field Value* is a single value (format depends on the data format of the metadata field).
-  - If 'between': *Field Value* is a list of two values (format depends on the data format of the metadata field).
+* **Field Name**: Name of the metadata filter (fieldLabel field in datasetFilters).
+* **Field Type**: Type of metadata filter. Options are: 
+
+    * *'value'*: set a specific value.
+    * *'between'*: set a range of values.  
+    
+* **Field Value**: Value of the metadata filter. Depending on the Field Type:
+
+    * *'value'*: Field Value is a single value (format depends on the data format of the metadata field).
+    * *'between'*: Field Value is a list of two values (format depends on the data format of the metadata field).
 
 **Search by a Bounding Box**
 
