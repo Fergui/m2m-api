@@ -25,6 +25,13 @@ The interface will prompt to the user to specify the username (or email) and the
   from api import M2M
   m2m = M2M()
   
+By default, the stable version of the M2M USGS API is used. To use another version, one can define *version* as string doing:
+
+.. code:: python
+
+  from api import M2M
+  m2m = M2M(version=version)
+  
 Look at your M2M USGS API permissions
 -------------------------------------
 
@@ -224,4 +231,4 @@ To make a custom request to the M2M USGS API, one needs to define the *endpoint*
 
 .. code:: python
 
-  m2m.sendRequest(endpoint,data)
+  m2m.sendRequest(endpoint, data)
