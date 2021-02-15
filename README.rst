@@ -3,18 +3,51 @@ Machine-to-Machine (M2M) Python API
 
 Python interface to use functionalities from the new Machine-to-Machine (M2M) `USGS API <https://m2m.cr.usgs.gov/>`__.
 
-The functionalities currently implemented are from endpoints: *login*, *dataset-search*, *dataset-filters*, *scene-search*, and *logout*.
+The functionalities currently implemented are from endpoints: *login*, *dataset-search*, *dataset-filters*, *scene-search*, *permissions*, and *logout*.
+
+For ordering and downloading data from USGS, one need to request access at https://ers.cr.usgs.gov/profile/access doing:
+  
+1) Login to your USGS account.
+2) Press *Request Access* bottom.
+3) Select *MACHINE* access type. 
+4) Fill survey about data use.
+5) Wait a couple of days before acceptance.
+
+Once request access is accepted, permissions should return ['download', 'order'].
 
 Connect to the M2M USGS API
 ---------------------------
 
-The interface will prompt to the user to specify the username (or email) and the password. It can also be specified when initializing the object using paramaters *username* and *password*.
+The interface will prompt to the user to specify the username (or email) and the password.
 
 .. code:: python
 
   from api import M2M
   m2m = M2M()
   
+It can also be specified when initializing the object using paramaters *username* and *password*.
+
+.. code:: python
+
+  from api import M2M
+  m2m = M2M(username, password)
+  
+By default, the stable version of the M2M USGS API is used. To use another version, one can define *version* as string doing:
+
+.. code:: python
+
+  from api import M2M
+  m2m = M2M(version=version)
+  
+Look at your M2M USGS API permissions
+-------------------------------------
+
+When the interface is initialized, it automatically looks at your permissions. So, the permissions is already an attribute of the object.
+
+.. code:: python
+
+  m2m.permissions
+
 
 Search for all available USGS datasets
 --------------------------------------
@@ -197,3 +230,12 @@ Search by Metadata information
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
 
+
+Cutom M2M USGS API request
+--------------------------
+
+To make a custom request to the M2M USGS API, one needs to define the *endpoint* which is the endpoint string. Possible string endpoints can be found at `here <https://m2m.cr.usgs.gov/api/docs/reference/>`__. Most endpoints need some data which can be defined using a python dictionary. The dictionary can be created using the test application of the M2M USGS API `here <https://m2m.cr.usgs.gov/api/test/json/>`__.
+
+.. code:: python
+
+  m2m.sendRequest(endpoint, data)
