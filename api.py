@@ -113,33 +113,67 @@ class M2M(object):
         params = {'label': label}
         return self.sendRequest('download-retrieve', params)
 
-    def downloadSearch(self, label='m2m-api_download'):
-        params = {'label': label}
-        return self.sendRequest('download-search', params)
+    def downloadSearch(self, label=None):
+        if label is not None:
+            params = {'label': label}
+            return self.sendRequest('download-search', params)
+        return self.sendRequest('download-search')
+
+    def downloadScenes(self, downloads, downloadMeta):
+        for download in downloads:
+            idD = str(download['downloadId'])
+            displayId = downloadMeta[idD]['displayId']
+            url = download['url']
+            local_path = osp.join(ACQ_PATH,displayId+'.tar')
+            if not available_locally(local_path):
+                download_url(url, local_path)
+            downloadMeta[idD].update({'url': url, 'local_path': local_path})
+            downloadMeta[idD]['statusCode'] = 'C'
+            downloadMeta[idD]['statusText'] = 'Complete'
+        return downloadMeta
 
     def retrieveScenes(self, datasetName, scenes, label='m2m-api_download'):
+        labels = [label]
         entityIds = [scene['entityId'] for scene in scenes['results']]
         filterOptions = {'downloadSystem': lambda x: x == 'dds_zip', 'available': lambda x: x}
         downloadOptions = self.downloadOptions(datasetName, entityIds, filterOptions)
         downloads = [{'entityId' : product['entityId'], 'productId' : product['id']} for product in downloadOptions]
-        requestResults = self.downloadRequest(downloads)
-        downloadMeta = {}
-        for ds in self.downloadSearch(label):
-            downloadMeta.update({str(ds['downloadId']): ds})
-        if requestResults['preparingDownloads'] != None and len(requestResults['preparingDownloads']) > 0:
-            requestResultsUpdated = self.downloadRetrieve(label)
+        requestedDownloadsCount = len(downloads)
+        if requestedDownloadsCount:
+            logging.info('M2M.retrieveScenes - Requested downloads count={}'.format(requestedDownloadsCount))
+            requestResults = self.downloadRequest(downloads)
+            if len(requestResults['duplicateProducts']):
+                for product in requestResults['duplicateProducts'].values():
+                    if product not in labels:
+                        labels.append(product)
+            downloadMeta = {}
+            for label in labels:
+                downloadSearch = self.downloadSearch(label)
+                if downloadSearch is not None:
+                    for ds in downloadSearch:
+                        downloadMeta.update({str(ds['downloadId']): ds})
+            if requestResults['preparingDownloads'] != None and len(requestResults['preparingDownloads']) > 0:
+                downloadIds = []
+                for label in labels:
+                    requestResultsUpdated = self.downloadRetrieve(label)
+                    downloadUpdate = requestResultsUpdated['available'] + requestResultsUpdated['requested']
+                    downloadMeta = self.downloadScenes(downloadUpdate, downloadMeta)
+                    downloadIds += downloadMeta
+                while len(downloadIds) < requestedDownloadsCount:
+                    preparingDownloads = requestedDownloadsCount - len(downloadIds)
+                    logging.info('M2M.retrieveScenes - {} downloads are not available. Waiting 10 seconds...'.format(preparingDownloads))
+                    time.sleep(10)
+                    for label in labels:
+                        requestResultsUpdated = self.downloadRetrieve(label)
+                        downloadUpdate = requestResultsUpdated['available']
+                        downloadMeta = self.downloadScenes(downloadUpdate, downloadMeta)
+                        downloadIds += downloadUpdate
+            else:
+                downloadMeta = self.downloadScenes(requestResults['availableDownloads'], downloadMeta)
+            return downloadMeta
         else:
-            for download in requestResults['availableDownloads']:
-                idD = str(download['downloadId'])
-                displayId = downloadMeta[idD]['displayId']
-                url = download['url']
-                local_path = osp.join(ACQ_PATH,displayId+'.tar')
-                if not available_locally(local_path):
-                    download_url(url, local_path)
-                downloadMeta[idD].update({'url': url, 'local_path': local_path})
-                downloadMeta[idD]['statusCode'] = 'C'
-                downloadMeta[idD]['statusText'] = 'Complete'
-        return downloadMeta
+            logging.info('M2M.retrieveScenes - No download options found')
+            return {}
 
     def logout(self):
         r = self.sendRequest('logout')
