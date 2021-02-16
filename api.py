@@ -115,7 +115,7 @@ class M2M(object):
 
     def downloadSearch(self, label='m2m-api_download'):
         params = {'label': label}
-        return m2m.sendRequest('download-search', params)
+        return self.sendRequest('download-search', params)
 
     def retrieveScenes(self, datasetName, scenes, label='m2m-api_download'):
         entityIds = [scene['entityId'] for scene in scenes['results']]
@@ -124,7 +124,7 @@ class M2M(object):
         downloads = [{'entityId' : product['entityId'], 'productId' : product['id']} for product in downloadOptions]
         requestResults = self.downloadRequest(downloads)
         downloadMeta = {}
-        for ds in m2m.downloadSearch(label):
+        for ds in self.downloadSearch(label):
             downloadMeta.update({str(ds['downloadId']): ds})
         if requestResults['preparingDownloads'] != None and len(requestResults['preparingDownloads']) > 0:
             requestResultsUpdated = self.downloadRetrieve(label)
