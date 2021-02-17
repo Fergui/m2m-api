@@ -99,7 +99,7 @@ You can search for scenes using different parameters. The parameters currently i
 +--------------------+---------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | *geoJsonCoords*    |                 List of lists               | Coordinates for the GeoJson expressed as [lon,lat] in EPSG:4326 projection. Example: *[[[-126.471753,32.135664], [-126.471753,42.399335], [-112.426439,42.399335], [-112.426439,32.135664], [-126.471753,32.135664]]]*.    |
 +--------------------+---------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| *geoJsonPath*      |                    String                   | Path to a GeoJson file. Example: *"geojson_files/california.geojson"*.                                                                                                                                                     |
+| *geoJsonPath*      |                    String                   | Path to a GeoJson file. Example: *"geojson/california.geojson"*.                                                                                                                                                           |
 +--------------------+---------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | *minCC*            |                    Integer                  | Used to limit results by minimum cloud cover (for supported datasets). Default is 0. Example: *10*.                                                                                                                        |
 +--------------------+---------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -196,7 +196,7 @@ Search by Cloud Cover range
       "datasetName": "landsat_ot_c2_l1",
       "startDate": "2020-08-01",
       "endDate": "2020-08-31",
-      "geoJsonPath": "geojson_files/california.geojson",
+      "geoJsonPath": "geojson/california.geojson",
       "minCC": 10,
       "maxCC": 70,
       "includeUnknownCC": False,
@@ -217,7 +217,7 @@ Search by Metadata information
       "datasetName": "landsat_ot_c2_l1",
       "startDate": "2020-08-01",
       "endDate": "2020-08-31",
-      "geoJsonPath": "geojson_files/california.geojson",
+      "geoJsonPath": "geojson/california.geojson",
       "metadataInfo": {
           "and": [
               ('Sensor Identifier','value','OLI_TIRS'),
