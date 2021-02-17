@@ -260,7 +260,9 @@ and then do:
 
 .. code:: python
 
-  downloadOptions = m2m.downloadOptions("landsat_ot_c2_l1", scenes['results'][0]['entityId'], filterOptions=filterOptions)
+  downloadOptions = m2m.downloadOptions("landsat_ot_c2_l1", 
+                                        scenes['results'][0]['entityId'], 
+                                        filterOptions=filterOptions)
 
 
 Download scenes using the USGS API
