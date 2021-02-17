@@ -280,7 +280,7 @@ In this case, the default download is to download all available data from DDS in
 Filter scenes to download
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Other filters can be specified using *filterOptions* argument. The default download, defines the filter to be:
+Other filters can be specified using *filterOptions* arguments. The default download, defines the filter to be:
 
 .. code:: python
 
