@@ -286,7 +286,11 @@ Other filters can be specified using *filterOptions* argument. The default downl
 
   filterOptions = {'downloadSystem': lambda x: x == 'dds_zip', 'available': lambda x: x}
   
-However, the user can specify custom keys and functions to evaluate as seen in previous sections.
+However, the user can specify custom keys and functions to evaluate as seen in previous sections and do:
+
+.. code:: python
+
+  downloadMetadata = m2m.retrieveScenes("landsat_ot_c2_l1", scenes, filterOptions=filterOptions)
 
 
 Cutom M2M USGS API request
