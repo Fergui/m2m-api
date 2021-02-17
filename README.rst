@@ -237,32 +237,26 @@ For a single or multiple scenes, you can search the download options using the *
 
 .. code:: python
 
-  downloadOptions = m2m.downloadOptions("landsat_ot_c2_l1", scenes['results'][0]['entityId'])
+  entityId = scenes['results'][0]['entityId']
+  downloadOptions = m2m.downloadOptions("landsat_ot_c2_l1", entityId)
 
 The results, show that for every scene, one has 8 different options to download. In order to filter specific options depending on arguments of the *downloadOptions*, one can use the *filterOptions* argument. Using that argument, scenes can be filtered using a key argument and a function to evaluate if valid or not. So, *filterOptions* is a dictionary with:
 
 - Keys from the *downloadOptions* dictionary that the user want to filter on.
 - Function taking the values from the *downloadOptions* dictionary as argument and returning False or True if filter or not filter out.
 
-For instance, if we only want products available for bulk download, one can do:
+For instance, if we only want products available for bulk download and that are Full-Resolution Browse (Natural Color) GeoTIFFs, one can do:
 
 .. code:: python
 
-  filterOptions = {'bulkAvailable': lambda x: x}
-
-or if we only want products that are Full-Resolution Browse (Natural Color) GeoTIFFs, you can do:
-
-.. code:: python
-
-  filterOptions = {'productName': lambda x: x == 'Full-Resolution Browse (Natural Color) GeoTIFF'}
+  filterOptions = {'bulkAvailable': lambda x: x,
+                   'productName': lambda x: x == 'Full-Resolution Browse (Natural Color) GeoTIFF'}
 
 and then do:
 
 .. code:: python
 
-  downloadOptions = m2m.downloadOptions("landsat_ot_c2_l1", 
-                                        scenes['results'][0]['entityId'], 
-                                        filterOptions=filterOptions)
+  downloadOptions = m2m.downloadOptions("landsat_ot_c2_l1", entityId, filterOptions=filterOptions)
 
 
 Download scenes using the USGS API
