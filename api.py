@@ -101,7 +101,7 @@ class M2M(object):
         params = {'datasetName': datasetName, 
                 'entityIds': entityIds}
         downloadOptions = self.sendRequest('download-options', params)
-        filteredOptions = apply_filter(downloadOptions,filterOptions)
+        filteredOptions = apply_filter(downloadOptions, filterOptions)
         return filteredOptions
             
     def downloadRequest(self, downloadList, label='m2m-api_download'):
@@ -132,10 +132,11 @@ class M2M(object):
             downloadMeta[idD]['statusText'] = 'Complete'
         return downloadMeta
 
-    def retrieveScenes(self, datasetName, scenes, label='m2m-api_download'):
+    def retrieveScenes(self, datasetName, scenes, filterOptions={}, label='m2m-api_download'):
+        if len(filterOptions) == 0:
+            filterOptions = {'downloadSystem': lambda x: x == 'dds_zip', 'available': lambda x: x}
         labels = [label]
         entityIds = [scene['entityId'] for scene in scenes['results']]
-        filterOptions = {'downloadSystem': lambda x: x == 'dds_zip', 'available': lambda x: x}
         downloadOptions = self.downloadOptions(datasetName, entityIds, filterOptions)
         downloads = [{'entityId' : product['entityId'], 'productId' : product['id']} for product in downloadOptions]
         requestedDownloadsCount = len(downloads)
