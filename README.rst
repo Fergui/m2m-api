@@ -3,7 +3,7 @@ Machine-to-Machine (M2M) Python API
 
 Python interface to use functionalities from the new Machine-to-Machine (M2M) `USGS API <https://m2m.cr.usgs.gov/>`__.
 
-The functionalities currently implemented are from endpoints: *login*, *dataset-search*, *dataset-filters*, *scene-search*, *permissions*, and *logout*.
+The functionalities currently implemented are from endpoints: *login*, *dataset-search*, *dataset-filters*, *scene-search*, *permissions*, *download-options*, *download-request*, *download-retrieve*, *download-search*, and *logout*.
 
 For ordering and downloading data from USGS, one need to request access at https://ers.cr.usgs.gov/profile/access doing:
   
@@ -209,7 +209,7 @@ Search by Cloud Cover range
                                                                     min(cloudCovers),max(cloudCovers)))
 
 Search by Metadata information
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -230,6 +230,58 @@ Search by Metadata information
   scenes = m2m.searchScenes(**params)
   print("{} - {} hits - {} returned".format(datasetName,scenes['totalHits'],scenes['recordsReturned']))
 
+Download options search
+-----------------------
+
+For a single or multiple scenes, you can search the download options using the *datasetName* and a single or a list of *entityIds*. The *entityId* can be found in the scene dictionary found using any search from previous sections. For instance, if we want to look at the download options for the first scene found for the "landsat_ot_c2_l1" dataset, we would do:
+
+.. code:: python
+
+  downloadOptions = m2m.downloadOptions("landsat_ot_c2_l1", scenes['results'][0]['entityId'])
+
+The results, show that for every scene, one has 8 different options to download. In order to filter specific options depending on arguments of the *downloadOptions*, one can use the *filterOptions* argument. Using that argument, scenes can be filtered using a key argument and a function to evaluate if valid or not. So, *filterOptions* is a dictionary with:
+
+- Keys from the *downloadOptions* dictionary that the user want to filter on.
+- Function taking the values from the *downloadOptions* dictionary as argument and returning False or True if filter or not filter out.
+
+For instance, if we only want products available for bulk download, one can do:
+
+.. code:: python
+
+  filterOptions = {'bulkAvailable': lambda x: x}
+
+or if we only want products that are Full-Resolution Browse (Natural Color) GeoTIFFs, you can do:
+
+.. code:: python
+
+  filterOptions = {'productName': lambda x: x == 'Full-Resolution Browse (Natural Color) GeoTIFF'}
+
+
+Download scenes using the USGS API
+----------------------------------
+
+Download scenes searched using the M2M USGS API can be downloaded specifying the *datasetName* of the search and the list of scenes retrieved using *searchScenes* from the previous section.
+
+Default download
+^^^^^^^^^^^^^^^^
+
+In this case, the default download is to download all available data from DDS in zip format. For instance:
+
+.. code:: python
+
+  downloadMetadata = m2m.retrieveScenes("landsat_ot_c2_l1", scenes)
+
+Filter scenes to download
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Other filters can be specified using *filterOptions* argument. The default download, defines the filter to be:
+
+.. code:: python
+
+  filterOptions = {'downloadSystem': lambda x: x == 'dds_zip', 'available': lambda x: x}
+  
+However, the user can specify custom keys and functions to evaluate as seen in previous sections.
+
 
 Cutom M2M USGS API request
 --------------------------
@@ -238,4 +290,4 @@ To make a custom request to the M2M USGS API, one needs to define the *endpoint*
 
 .. code:: python
 
-  m2m.sendRequest(endpoint, data)
+  r = m2m.sendRequest(endpoint, data)
