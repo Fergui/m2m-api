@@ -181,7 +181,7 @@ Search by GeoJson file
       "datasetName": "landsat_ot_c2_l1",
       "startDate": "2020-08-01",
       "endDate": "2020-08-31",
-      "geoJsonPath": "geojson_files/california.geojson",
+      "geoJsonPath": "geojson/california.geojson",
       "maxResults": 10000
   }
   scenes = m2m.searchScenes(**params)
