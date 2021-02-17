@@ -3,7 +3,7 @@ from six.moves.urllib import request as urequest
 import os.path as osp
 
 sleep_seconds = 5
-max_retries = 3
+total_max_retries = 3
 wget = 'wget'
 wget_options = ["--read-timeout=1"]
 download_sleep_seconds = 3
@@ -14,7 +14,7 @@ class DownloadError(Exception):
     """
     pass
 
-def download_url(url, local_path, content_size, max_retries=max_retries, sleep_seconds=sleep_seconds):
+def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=sleep_seconds):
     """
     Download a remote URL to the location local_path with retries.
 
@@ -32,6 +32,18 @@ def download_url(url, local_path, content_size, max_retries=max_retries, sleep_s
     sec = random.random() * download_sleep_seconds
     logging.info('download_url - sleeping {} seconds'.format(sec))
     time.sleep(sec)
+
+    try:
+        r = urequest.urlopen(url)
+        content_size = int(r.headers.get('content-length',0))
+        if content_size == 0:
+            raise DownloadError('download_url - content size is equal to 0')
+    except Exception as e:
+        if max_retries > 0:
+            logging.info('download_url - trying again with {} available retries, first sleeping {} seconds'.format(max_retries,sleep_seconds))
+            time.sleep(sleep_seconds)
+            download_url(url, local_path, max_retries = max_retries - 1)
+        return
 
     remove(local_path)
     command=[wget,'-O',ensure_dir(local_path),url]
