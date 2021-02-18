@@ -2,10 +2,12 @@ import logging, time, subprocess, requests, random, os, threading
 from six.moves.urllib import request as urequest
 import os.path as osp
 
+ACQ_PATH = './ingest'
+
 sleep_seconds = 5
 total_max_retries = 3
 wget = 'wget'
-wget_options = ["--read-timeout=1"]
+wget_options = ["--quiet", "--read-timeout=1", "--random-wait", "--progress=dot:giga", "--limit-rate=10m"]
 download_sleep_seconds = 3
 
 max_threads = 10
@@ -32,40 +34,37 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
     :param sleep_seconds: sleep seconds between retries
     """
     sema.acquire()
-    logging.info('download_url - {0} as {1}'.format(url, local_path))
-    logging.debug('download_url - if download fails, will try {0} times and wait {1} seconds each time'.format(max_retries, sleep_seconds))
+    bname = osp.basename(local_path)
+    logging.info('download_url - {} - downloading {} as {}'.format(bname, url, local_path))
     sec = random.random() * download_sleep_seconds
-    logging.info('download_url - sleeping {} seconds'.format(sec))
     time.sleep(sec)
 
     try:
-        r = urequest.urlopen(url)
+        r = requests.get(url, stream=True)
         content_size = int(r.headers.get('content-length',0))
         if content_size == 0:
             raise DownloadError('download_url - content size is equal to 0')
     except Exception as e:
         if max_retries > 0:
-            logging.info('download_url - trying again with {} available retries, first sleeping {} seconds'.format(max_retries,sleep_seconds))
+            logging.info('download_url - {} - trying again with {} available retries'.format(bname, max_retries))
             time.sleep(sleep_seconds)
             sema.release()
             run_download(url, local_path, max_retries = max_retries - 1)
         return
 
     remove(local_path)
+    logging.info('download_url - {} - starting download...'.format(bname, url, local_path))
     command=[wget,'-O',ensure_dir(local_path),url]
     for opt in wget_options:
         command.insert(1,opt)
-    logging.info(' '.join(command))
+    logging.debug(' '.join(command))
     subprocess.call(' '.join(command),shell=True)
 
     file_size = osp.getsize(local_path)
-
-    logging.info('download_url - local file size {0} remote content size {1}'.format(file_size, content_size))
-
+    logging.info('download_url - {} - local file size {} remote content size {}'.format(bname, file_size, content_size))
     if int(file_size) != int(content_size):
-        logging.warning('download_url - wrong file size, trying again, retries available {}'.format(max_retries))
+        logging.warning('download_url - {} - wrong file size, trying again, retries available {}'.format(bname, max_retries))
         if max_retries > 0:
-            logging.info('download_url - sleeping {} seconds'.format(sleep_seconds))
             time.sleep(sleep_seconds)
             sema.release()
             run_download(url, local_path, content_size, max_retries = max_retries-1)
@@ -73,10 +72,12 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
         else:
             sema.release()
             os.remove(local_path)
-            raise DownloadError('download_url - failed to download file {}'.format(url))
+            raise DownloadError('download_url - {} - failed to download file {}'.format(bname, url))
 
     info_path = local_path + '.size'
     open(ensure_dir(info_path), 'w').write(str(content_size))
+    logging.info('download_url - {} - success download'.format(bname))
+    sema.release()
 
 def run_download(threads, url, local_path, max_retries=total_max_retries):
     thread = threading.Thread(target=download_url, args=(url,local_path,max_retries))
@@ -84,6 +85,7 @@ def run_download(threads, url, local_path, max_retries=total_max_retries):
     thread.start()
 
 def download_scenes(downloads, downloadMeta):
+    logging.info('download_scenes - downloading {} scenes'.format(len(downloads)))
     for download in downloads:
         idD = str(download['downloadId'])
         displayId = downloadMeta[idD]['displayId']
@@ -94,8 +96,11 @@ def download_scenes(downloads, downloadMeta):
         else:
             run_download(threads, url, local_path)
         downloadMeta[idD].update({'url': url, 'local_path': local_path})
+    finished = 0
     for thread in threads:
         thread.join()
+        finished += 1
+        logging.info('download_scenes - download finished by {}/{} scenes'.format(finished,len(threads)))
 
 def ensure_dir(path):
     """
@@ -116,3 +121,15 @@ def remove(tgt):
     if osp.isfile(tgt):
         logging.info('remove - file {} exists, removing'.format(tgt))
         os.remove(tgt)
+
+def available_locally(path):
+    """
+    Check if a file is available locally and if it's file size checks out.
+
+    :param path: the file path
+    """
+    info_path = path + '.size'
+    if osp.exists(path) and osp.exists(info_path):
+        content_size = int(open(info_path).read())
+        return osp.getsize(path) == content_size
+    return False

@@ -7,10 +7,10 @@ import os.path as osp
 from getpass import getpass
 
 from .filters import Filter
-from .downloader import download_url
+from .downloader import download_scenes
 
 M2M_ENDPOINT = 'https://m2m.cr.usgs.gov/api/api/json/{}'
-ACQ_PATH = './ingest'
+logging.getLogger('requests').setLevel(logging.WARNING)
 
 class M2MError(Exception):
     """
@@ -197,14 +197,3 @@ def apply_filter(elements, key_filters):
             result.append(element)
     return result
 
-def available_locally(path):
-    """
-    Check if a file is available locally and if it's file size checks out.
-
-    :param path: the file path
-    """
-    info_path = path + '.size'
-    if osp.exists(path) and osp.exists(info_path):
-        content_size = int(open(info_path).read())
-        return osp.getsize(path) == content_size
-    return False
