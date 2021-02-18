@@ -119,19 +119,6 @@ class M2M(object):
             return self.sendRequest('download-search', params)
         return self.sendRequest('download-search')
 
-    def downloadScenes(self, downloads, downloadMeta):
-        for download in downloads:
-            idD = str(download['downloadId'])
-            displayId = downloadMeta[idD]['displayId']
-            url = download['url']
-            local_path = osp.join(ACQ_PATH,displayId+'.tar')
-            if not available_locally(local_path):
-                download_url(url, local_path)
-            downloadMeta[idD].update({'url': url, 'local_path': local_path})
-            downloadMeta[idD]['statusCode'] = 'C'
-            downloadMeta[idD]['statusText'] = 'Complete'
-        return downloadMeta
-
     def retrieveScenes(self, datasetName, scenes, filterOptions={}, label='m2m-api_download'):
         if len(filterOptions) == 0:
             filterOptions = {'downloadSystem': lambda x: x == 'dds_zip', 'available': lambda x: x}
@@ -158,7 +145,7 @@ class M2M(object):
                 for label in labels:
                     requestResultsUpdated = self.downloadRetrieve(label)
                     downloadUpdate = requestResultsUpdated['available'] + requestResultsUpdated['requested']
-                    downloadMeta = self.downloadScenes(downloadUpdate, downloadMeta)
+                    downloadMeta = download_scenes(downloadUpdate, downloadMeta)
                     downloadIds += downloadMeta
                 while len(downloadIds) < requestedDownloadsCount:
                     preparingDownloads = requestedDownloadsCount - len(downloadIds)
@@ -167,10 +154,10 @@ class M2M(object):
                     for label in labels:
                         requestResultsUpdated = self.downloadRetrieve(label)
                         downloadUpdate = requestResultsUpdated['available']
-                        downloadMeta = self.downloadScenes(downloadUpdate, downloadMeta)
+                        download_scenes(downloadUpdate, downloadMeta)
                         downloadIds += downloadUpdate
             else:
-                downloadMeta = self.downloadScenes(requestResults['availableDownloads'], downloadMeta)
+                download_scenes(requestResults['availableDownloads'], downloadMeta)
             return downloadMeta
         else:
             logging.info('M2M.retrieveScenes - No download options found')
