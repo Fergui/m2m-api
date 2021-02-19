@@ -6,8 +6,8 @@ import time
 import os.path as osp
 from getpass import getpass
 
-from .filters import Filter
-from .downloader import download_scenes
+from filters import Filter
+from downloader import download_scenes
 
 M2M_ENDPOINT = 'https://m2m.cr.usgs.gov/api/api/json/{}'
 logging.getLogger('requests').setLevel(logging.WARNING)

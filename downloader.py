@@ -101,6 +101,7 @@ def download_scenes(downloads, downloadMeta):
         thread.join()
         finished += 1
         logging.info('download_scenes - download finished by {}/{} scenes'.format(finished,len(threads)))
+    logging.info('download_scenes - all download scenes finished')
 
 def ensure_dir(path):
     """
