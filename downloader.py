@@ -49,11 +49,11 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
             logging.info('download_url - {} - trying again with {} available retries'.format(bname, max_retries))
             time.sleep(sleep_seconds)
             sema.release()
-            run_download(url, local_path, max_retries = max_retries - 1)
+            download_url(url, local_path, max_retries = max_retries - 1, sleep_seconds=sleep_seconds)
         return
 
     remove(local_path)
-    logging.info('download_url - {} - starting download...'.format(bname, url, local_path))
+    logging.info('download_url - {} - starting download...'.format(bname))
     command=[wget,'-O',ensure_dir(local_path),url]
     for opt in wget_options:
         command.insert(1,opt)
@@ -67,7 +67,7 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
         if max_retries > 0:
             time.sleep(sleep_seconds)
             sema.release()
-            run_download(url, local_path, content_size, max_retries = max_retries-1)
+            download_url(url, local_path, content_size, max_retries = max_retries-1, sleep_seconds=sleep_seconds)
             return
         else:
             sema.release()

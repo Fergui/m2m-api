@@ -119,9 +119,12 @@ class M2M(object):
             return self.sendRequest('download-search', params)
         return self.sendRequest('download-search')
 
+    def downloadOrderRemove(self, label):
+        self.sendRequest('download-order-remove', label)
+
     def retrieveScenes(self, datasetName, scenes, filterOptions={}, label='m2m-api_download'):
         if len(filterOptions) == 0:
-            filterOptions = {'downloadSystem': lambda x: x == 'dds_zip', 'available': lambda x: x}
+            filterOptions = {'downloadSystem': lambda x: x == 'dds_zip' or x == 'dds', 'available': lambda x: x}
         labels = [label]
         entityIds = [scene['entityId'] for scene in scenes['results']]
         downloadOptions = self.downloadOptions(datasetName, entityIds, filterOptions)
@@ -145,7 +148,7 @@ class M2M(object):
                 for label in labels:
                     requestResultsUpdated = self.downloadRetrieve(label)
                     downloadUpdate = requestResultsUpdated['available'] + requestResultsUpdated['requested']
-                    downloadMeta = download_scenes(downloadUpdate, downloadMeta)
+                    download_scenes(downloadUpdate, downloadMeta)
                     downloadIds += downloadMeta
                 while len(downloadIds) < requestedDownloadsCount:
                     preparingDownloads = requestedDownloadsCount - len(downloadIds)
