@@ -13,7 +13,7 @@ For ordering and downloading data from USGS, one need to request access at https
 4) Fill survey about data use.
 5) Wait a couple of days before acceptance.
 
-Once request access is accepted, permissions should return ['download', 'order'].
+Once request access is accepted, permissions should return ['user', 'download', 'order'].
 
 Connect to the M2M USGS API
 ---------------------------
@@ -289,7 +289,7 @@ However, the user can specify custom keys and functions to evaluate as seen in p
   downloadMetadata = m2m.retrieveScenes("landsat_ot_c2_l1", scenes, filterOptions=filterOptions)
 
 
-Cutom M2M USGS API request
+Custom M2M USGS API request
 --------------------------
 
 To make a custom request to the M2M USGS API, one needs to define the *endpoint* which is the endpoint string. Possible string endpoints can be found at `here <https://m2m.cr.usgs.gov/api/docs/reference/>`__. Most endpoints need some data which can be defined using a python dictionary. The dictionary can be created using the test application of the M2M USGS API `here <https://m2m.cr.usgs.gov/api/test/json/>`__.
