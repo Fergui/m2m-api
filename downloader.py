@@ -1,4 +1,5 @@
-import logging, time, subprocess, requests, random, os, threading
+import concurrent.futures
+import logging, time, subprocess, requests, random, os
 from six.moves.urllib import request as urequest
 import os.path as osp
 
@@ -11,8 +12,6 @@ wget_options = ["--quiet", "--read-timeout=1", "--random-wait", "--progress=dot:
 download_sleep_seconds = 3
 
 max_threads = 10
-sema = threading.Semaphore(value=max_threads)
-threads = []
 
 class DownloadError(Exception):
     """
@@ -33,7 +32,6 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
     :param max_retries: how many times we may retry to download the file
     :param sleep_seconds: sleep seconds between retries
     """
-    sema.acquire()
     bname = osp.basename(local_path)
     logging.info('download_url - {} - downloading {} as {}'.format(bname, url, local_path))
     sec = random.random() * download_sleep_seconds
@@ -48,17 +46,20 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
         if max_retries > 0:
             logging.info('download_url - {} - trying again with {} available retries'.format(bname, max_retries))
             time.sleep(sleep_seconds)
-            sema.release()
             download_url(url, local_path, max_retries = max_retries - 1, sleep_seconds=sleep_seconds)
         return
 
     remove(local_path)
     logging.info('download_url - {} - starting download...'.format(bname))
+    '''
     command=[wget,'-O',ensure_dir(local_path),url]
     for opt in wget_options:
         command.insert(1,opt)
-    logging.debug(' '.join(command))
+    logging.info(' '.join(command))
     subprocess.call(' '.join(command),shell=True)
+    '''
+    with open(ensure_dir(local_path), 'wb') as f:
+        f.write(r.raw.read())
 
     file_size = osp.getsize(local_path)
     logging.info('download_url - {} - local file size {} remote content size {}'.format(bname, file_size, content_size))
@@ -66,41 +67,41 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
         logging.warning('download_url - {} - wrong file size, trying again, retries available {}'.format(bname, max_retries))
         if max_retries > 0:
             time.sleep(sleep_seconds)
-            sema.release()
             download_url(url, local_path, content_size, max_retries = max_retries-1, sleep_seconds=sleep_seconds)
             return
         else:
-            sema.release()
             os.remove(local_path)
             raise DownloadError('download_url - {} - failed to download file {}'.format(bname, url))
-
+        
     info_path = local_path + '.size'
     open(ensure_dir(info_path), 'w').write(str(content_size))
     logging.info('download_url - {} - success download'.format(bname))
-    sema.release()
-
-def run_download(threads, url, local_path, max_retries=total_max_retries):
-    thread = threading.Thread(target=download_url, args=(url,local_path,max_retries))
-    threads.append(thread)
-    thread.start()
 
 def download_scenes(downloads, downloadMeta):
+    """
+    Download all scenes using multithreading.
+
+    :param downloads: list of downloadable scenes
+    :param downloadMeta: dictionary with metadata from all scenes
+    """
     logging.info('download_scenes - downloading {} scenes'.format(len(downloads)))
-    for download in downloads:
-        idD = str(download['downloadId'])
-        displayId = downloadMeta[idD]['displayId']
-        url = download['url']
-        local_path = osp.join(ACQ_PATH,displayId+'.tar')
-        if available_locally(local_path):
-            logging.info('downloadScenes - file {} is locally available'.format(local_path))
-        else:
-            run_download(threads, url, local_path)
-        downloadMeta[idD].update({'url': url, 'local_path': local_path})
-    finished = 0
-    for thread in threads:
-        thread.join()
-        finished += 1
-        logging.info('download_scenes - download finished by {}/{} scenes'.format(finished,len(threads)))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        futures = []
+        for download in downloads:
+            idD = str(download['downloadId'])
+            displayId = downloadMeta[idD]['displayId']
+            url = download['url']
+            local_path = osp.join(ACQ_PATH,displayId+'.tar')
+            if available_locally(local_path):
+                logging.info('downloadScenes - file {} is locally available'.format(local_path))
+            else:
+                future = executor.submit(download_url, url, local_path)
+                futures.append(future)
+            downloadMeta[idD].update({'url': url, 'local_path': local_path})
+        finished = 0
+        for future in concurrent.futures.as_completed(futures):
+            finished += 1
+            logging.info('download_scenes - download finished by {}/{} scenes'.format(finished,len(futures)))
     logging.info('download_scenes - all download scenes finished')
 
 def ensure_dir(path):

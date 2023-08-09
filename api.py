@@ -95,12 +95,26 @@ class M2M(object):
                                                                                                                                         scenes['recordsReturned']))
         return scenes
 
-    def downloadOptions(self, datasetName, entityIds, filterOptions={}):
+    def sceneListAdd(self, listId, datasetName, **args):
+        args['listId'] = listId
         if datasetName not in self.datasetNames:
             raise M2MError("Dataset {} not one of the available datasets {}".format(datasetName,self.datasetNames))
-        params = {'datasetName': datasetName, 
-                'entityIds': entityIds}
-        downloadOptions = self.sendRequest('download-options', params)
+        args['datasetName'] = datasetName
+        self.sendRequest('scene-list-add', args)
+    
+    def sceneListGet(self, listId, **args):
+        args['listId'] = listId
+        self.sendRequest('scene-list-get', args)
+
+    def sceneListRemove(self, listId, **args):
+        args['listId'] = listId
+        self.sendRequest('scene-list-remove', args)
+
+    def downloadOptions(self, datasetName, filterOptions={}, **args):
+        if datasetName not in self.datasetNames:
+            raise M2MError("Dataset {} not one of the available datasets {}".format(datasetName,self.datasetNames))
+        args['datasetName'] = datasetName
+        downloadOptions = self.sendRequest('download-options', args)
         filteredOptions = apply_filter(downloadOptions, filterOptions)
         return filteredOptions
             
@@ -123,11 +137,13 @@ class M2M(object):
         self.sendRequest('download-order-remove', label)
 
     def retrieveScenes(self, datasetName, scenes, filterOptions={}, label='m2m-api_download'):
-        if len(filterOptions) == 0:
-            filterOptions = {'downloadSystem': lambda x: x == 'dds_zip' or x == 'dds', 'available': lambda x: x}
-        labels = [label]
         entityIds = [scene['entityId'] for scene in scenes['results']]
-        downloadOptions = self.downloadOptions(datasetName, entityIds, filterOptions)
+        self.sceneListAdd(label, datasetName, entityIds=entityIds)
+        downloadMeta = {}
+        if not len(filterOptions):
+            filterOptions = {'downloadSystem': lambda x: 'dds' in x, 'available': lambda x: x}
+        labels = [label]
+        downloadOptions = self.downloadOptions(datasetName, filterOptions, listId=label, includeSecondaryFileGroups=False)
         downloads = [{'entityId' : product['entityId'], 'productId' : product['id']} for product in downloadOptions]
         requestedDownloadsCount = len(downloads)
         if requestedDownloadsCount:
@@ -137,7 +153,6 @@ class M2M(object):
                 for product in requestResults['duplicateProducts'].values():
                     if product not in labels:
                         labels.append(product)
-            downloadMeta = {}
             for label in labels:
                 downloadSearch = self.downloadSearch(label)
                 if downloadSearch is not None:
@@ -161,10 +176,11 @@ class M2M(object):
                         downloadIds += downloadUpdate
             else:
                 download_scenes(requestResults['availableDownloads'], downloadMeta)
-            return downloadMeta
         else:
             logging.info('M2M.retrieveScenes - No download options found')
-            return {}
+        for label in labels:
+            self.downloadOrderRemove(label)
+        return downloadMeta
 
     def logout(self):
         r = self.sendRequest('logout')
@@ -175,28 +191,28 @@ class M2M(object):
     def __exit__(self):
         self.logout()
 
-def retry_connect(url, json_data, headers={}, max_retries=5, sleep_seconds=1):
+def retry_connect(url, json_data, headers={}, max_retries=5, sleep_seconds=2, timeout=600):
     retries = 0
     while retries < max_retries:
         try:
-            response = requests.post(url, json_data, headers=headers, timeout=5)
-        except:
+            response = requests.post(url, json_data, headers=headers, timeout=timeout)
+            return response
+        except requests.exceptions.Timeout:
             retries += 1
             logging.info('Connection Timeout - retry number {} of {}'.format(retries,max_retries))
-            sec = random.random() * sleep_seconds
+            sec = random.random() * sleep_seconds + 100.
             time.sleep(sec)
-        else:
-            return response
     raise M2MError("Maximum retries exceeded")
 
 def apply_filter(elements, key_filters):
     result = []
-    for element in elements:
-        get_elem = True
-        for key,filt in key_filters.items():
-            if not filt(element[key]):
-                get_elem = False
-        if get_elem:
-            result.append(element)
+    if elements != None:
+        for element in elements:
+            get_elem = True
+            for key,filt in key_filters.items():
+                if not filt(element[key]):
+                    get_elem = False
+            if get_elem:
+                result.append(element)
     return result
 
