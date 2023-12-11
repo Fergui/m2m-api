@@ -280,7 +280,7 @@ Other filters can be specified using *filterOptions* arguments. The default down
 
 .. code:: python
 
-  filterOptions = {'downloadSystem': lambda x: x == 'dds_zip', 'available': lambda x: x}
+  filterOptions = {'downloadSystem': lambda x: x in ['dds', 'zip'], 'available': lambda x: x}
   
 However, the user can specify custom keys and functions to evaluate as seen in previous sections and do:
 
