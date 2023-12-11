@@ -32,25 +32,27 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
     :param max_retries: how many times we may retry to download the file
     :param sleep_seconds: sleep seconds between retries
     """
-    bname = osp.basename(local_path)
-    logging.info('download_url - {} - downloading {} as {}'.format(bname, url, local_path))
+    dname = osp.basename(local_path)
+    logging.info('download_url - {} - downloading {} as {}'.format(dname, url, local_path))
     sec = random.random() * download_sleep_seconds
     time.sleep(sec)
 
     try:
         r = requests.get(url, stream=True)
-        content_size = int(r.headers.get('content-length',0))
+        content_size = int(r.headers.get('content-length', 0))
         if content_size == 0:
+            logging.error('download_url - content size is equal to 0')
             raise DownloadError('download_url - content size is equal to 0')
     except Exception as e:
         if max_retries > 0:
-            logging.info('download_url - {} - trying again with {} available retries'.format(bname, max_retries))
+            logging.info('download_url - {} - trying again with {} available retries'.format(dname, max_retries))
             time.sleep(sleep_seconds)
             download_url(url, local_path, max_retries = max_retries - 1, sleep_seconds=sleep_seconds)
-        return
+        logging.error('download_url - {} - no more retries available'.format(dname))
+        raise DownloadError('download_url - {} - failed to find file {}'.format(dname, url))
 
     remove(local_path)
-    logging.info('download_url - {} - starting download...'.format(bname))
+    logging.info('download_url - {} - starting download...'.format(dname))
     '''
     command=[wget,'-O',ensure_dir(local_path),url]
     for opt in wget_options:
@@ -62,20 +64,19 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
         f.write(r.raw.read())
 
     file_size = osp.getsize(local_path)
-    logging.info('download_url - {} - local file size {} remote content size {}'.format(bname, file_size, content_size))
-    if int(file_size) != int(content_size):
-        logging.warning('download_url - {} - wrong file size, trying again, retries available {}'.format(bname, max_retries))
+    logging.info('download_url - {} - local file size {} remote content size {}'.format(dname, file_size, content_size))
+    if int(file_size) != int(content_size) and int(content_size) > 0:
+        logging.warning('download_url - {} - wrong file size, trying again, retries available {}'.format(dname, max_retries))
         if max_retries > 0:
             time.sleep(sleep_seconds)
             download_url(url, local_path, content_size, max_retries = max_retries-1, sleep_seconds=sleep_seconds)
-            return
-        else:
-            os.remove(local_path)
-            raise DownloadError('download_url - {} - failed to download file {}'.format(bname, url))
+        logging.error('download_url - {} - deleting local file, no more retries available'.format(dname))
+        os.remove(local_path)
+        raise DownloadError('download_url - {} - failed to download file {}'.format(dname, url))
         
     info_path = local_path + '.size'
     open(ensure_dir(info_path), 'w').write(str(content_size))
-    logging.info('download_url - {} - success download'.format(bname))
+    logging.info('download_url - {} - success download'.format(dname))
 
 def download_scenes(downloads, downloadMeta):
     """
@@ -133,5 +134,5 @@ def available_locally(path):
     info_path = path + '.size'
     if osp.exists(path) and osp.exists(info_path):
         content_size = int(open(info_path).read())
-        return osp.getsize(path) == content_size
+        return osp.getsize(path) == content_size and content_size > 0
     return False
