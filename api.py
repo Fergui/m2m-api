@@ -134,14 +134,15 @@ class M2M(object):
         return self.sendRequest('download-search')
 
     def downloadOrderRemove(self, label):
-        self.sendRequest('download-order-remove', label)
+        params = {'label': label}
+        self.sendRequest('download-order-remove', params)
 
     def retrieveScenes(self, datasetName, scenes, filterOptions={}, label='m2m-api_download'):
         entityIds = [scene['entityId'] for scene in scenes['results']]
         self.sceneListAdd(label, datasetName, entityIds=entityIds)
         downloadMeta = {}
         if not len(filterOptions):
-            filterOptions = {'downloadSystem': lambda x: 'dds' in x, 'available': lambda x: x}
+            filterOptions = {'downloadSystem': lambda x: x in ['dds', 'ls_zip'], 'available': lambda x: x}
         labels = [label]
         downloadOptions = self.downloadOptions(datasetName, filterOptions, listId=label, includeSecondaryFileGroups=False)
         downloads = [{'entityId' : product['entityId'], 'productId' : product['id']} for product in downloadOptions]
