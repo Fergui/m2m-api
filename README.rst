@@ -39,7 +39,7 @@ Furthermore, a token can be specified when initializing the object using paramet
   from api import M2M
   m2m = M2M(username, token)
 
-If a token is used, the token is stored in config file and reused if no parameters are provided in the next calls.
+If a token is used, the token is stored in the config file and reused if no arguments are provided in the next calls. Arguments have higher priority than the config file. So, if you want to login using a password or a different username, use the arguments or delete the existing config file.
 
 By default, the stable version of the M2M USGS API is used. To use another version, one can define *version* as a string doing:
 
