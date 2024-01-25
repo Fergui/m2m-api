@@ -18,27 +18,37 @@ Once request access is accepted, permissions should return ['user', 'download', 
 Connect to the M2M USGS API
 ---------------------------
 
-The interface will prompt to the user to specify the username (or email) and the password.
+The interface will prompt the user to specify the username (or email) and the password unless you already have token authentication in your config file (~/.config/m2m-api/config.json).
 
 .. code:: python
 
   from api import M2M
   m2m = M2M()
   
-It can also be specified when initializing the object using paramaters *username* and *password*.
+It can also be specified when initializing the object using parameters *username* and *password*.
 
 .. code:: python
 
   from api import M2M
   m2m = M2M(username, password)
-  
-By default, the stable version of the M2M USGS API is used. To use another version, one can define *version* as string doing:
+
+Furthermore, a token can be specified when initializing the object using parameters *username* and *token*.
+
+.. code:: python
+
+  from api import M2M
+  m2m = M2M(username, token)
+
+If a token is used, the token is stored in config file and reused if no parameters are provided in the next calls.
+
+By default, the stable version of the M2M USGS API is used. To use another version, one can define *version* as a string doing:
 
 .. code:: python
 
   from api import M2M
   m2m = M2M(version=version)
-  
+
+
 Look at your M2M USGS API permissions
 -------------------------------------
 
