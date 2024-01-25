@@ -4,6 +4,7 @@ import json
 import random
 import time
 import os.path as osp
+from pathlib import Path
 from getpass import getpass
 
 from filters import Filter
@@ -21,16 +22,60 @@ class M2MError(Exception):
 class M2M(object):
     """M2M EarthExplorer API."""
 
-    def __init__(self, username=None, password=None, version="stable"):
-        self.apiKey = None
-        if username is None:
-            username = input("Enter your username (or email): ")
-        self.username = username
+    def __init__(self, username=None, password=None, token=None, version="stable"):
         self.serviceUrl = M2M_ENDPOINT.format(version)
-        self.login(password)
+        self.apiKey = None
+        self.authenticate(username, password, token)
         allDatasets = self.sendRequest('dataset-search')
         self.datasetNames = [dataset['datasetAlias'] for dataset in allDatasets]
         self.permissions = self.sendRequest('permissions')
+
+    def authenticate(self, username, password, token):
+        config_path = '~/.config/m2m_api'
+        config_path = Path(osp.expandvars(config_path)).expanduser().resolve()
+        config_file = config_path / 'config.json'
+        try:
+            config = json.load(open(config_file))
+        except:
+            config_path.mkdir(parents=True, exist_ok=True)
+            config = {} 
+        
+        self.username = None
+        if username is None:
+            self.username = config.get('username')
+            if self.username is None:
+                username = input("Enter your username (or email): ")
+                self.username = username
+                config['username'] = username
+            
+        if password != None:
+            self.login(password)
+        elif token != None:
+            config = {
+                'username': username,
+                'token': token
+            }
+            json.dump(config, open(config_file, 'w'), indent=4, separators=(',', ': '))
+            self.loginToken(token)
+        else:
+            token = config.get('token')
+            if token is None:
+                option = None
+                while option not in ["p", "P", "t", "T"]:
+                    option = input("Want to use password (p) or token (t)? ")
+                if option in ["p", "P"]:
+                    password = getpass()
+                    self.login(password)
+                else:
+                    token = input('Enter your token: ')
+                    config = {
+                        'username': username,
+                        'token': token
+                    }
+                    json.dump(config, open(config_file, 'w'), indent=4, separators=(',', ': '))
+                    self.loginToken(token)
+            else:
+                self.loginToken(token)
 
     def sendRequest(self, endpoint, data={}, max_retries=5):
         url = osp.join(self.serviceUrl, endpoint)
@@ -67,9 +112,15 @@ class M2M(object):
 
     def login(self, password=None):
         if password is None:
-            password = getpass()
-        loginParameters = {'username' : self.username, 'password' : password}
-        self.apiKey = self.sendRequest('login',loginParameters)
+            raise M2MError('password not provided')
+        loginParameters = {'username': self.username, 'password': password}
+        self.apiKey = self.sendRequest('login', loginParameters)
+
+    def loginToken(self, token=None):
+        if token is None: 
+            raise M2MError('token not provided')
+        loginParameters = {'username': self.username, 'token': token}
+        self.apiKey = self.sendRequest('login-token', loginParameters)
 
     def searchDatasets(self, **args):
         args['processList'] = ['datasetName','acquisitionFilter','spatialFilter']
@@ -216,4 +267,3 @@ def apply_filter(elements, key_filters):
             if get_elem:
                 result.append(element)
     return result
-
