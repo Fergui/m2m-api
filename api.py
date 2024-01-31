@@ -10,7 +10,7 @@ from getpass import getpass
 from filters import Filter
 from downloader import download_scenes
 
-M2M_ENDPOINT = 'https://m2m.cr.usgs.gov/api/api/json/{}'
+M2M_ENDPOINT = 'https://m2m.cr.usgs.gov/api/api/json/{}/'
 logging.getLogger('requests').setLevel(logging.WARNING)
 
 class M2MError(Exception):
@@ -40,8 +40,8 @@ class M2M(object):
             config_path.mkdir(parents=True, exist_ok=True)
             config = {} 
         
-        self.username = None
-        if username is None:
+        self.username = username
+        if self.username is None:
             self.username = config.get('username')
             if self.username is None:
                 username = input("Enter your username (or email): ")
