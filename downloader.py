@@ -71,7 +71,7 @@ def download_url(url, local_path, max_retries=total_max_retries, sleep_seconds=s
             time.sleep(sleep_seconds)
             download_url(url, local_path, content_size, max_retries = max_retries-1, sleep_seconds=sleep_seconds)
         logging.error('download_url - {} - deleting local file, no more retries available'.format(dname))
-        os.remove(local_path)
+        remove(local_path)
         raise DownloadError('download_url - {} - failed to download file {}'.format(dname, url))
         
     info_path = local_path + '.size'
@@ -89,16 +89,19 @@ def download_scenes(downloads, downloadMeta):
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
         futures = []
         for download in downloads:
-            idD = str(download['downloadId'])
-            displayId = downloadMeta[idD]['displayId']
             url = download['url']
-            local_path = osp.join(ACQ_PATH,displayId+'.tar')
-            if available_locally(local_path):
-                logging.info('downloadScenes - file {} is locally available'.format(local_path))
+            idD = str(download['downloadId'])
+            if idD in downloadMeta.keys():
+                displayId = downloadMeta[idD]['displayId']
+                local_path = osp.join(ACQ_PATH,displayId+'.tar')
+                if available_locally(local_path):
+                    logging.info('downloadScenes - file {} is locally available'.format(local_path))
+                else:
+                    future = executor.submit(download_url, url, local_path)
+                    futures.append(future)
+                downloadMeta[idD].update({'url': url, 'local_path': local_path})
             else:
-                future = executor.submit(download_url, url, local_path)
-                futures.append(future)
-            downloadMeta[idD].update({'url': url, 'local_path': local_path})
+                logging.warning(f'download_scenes - scene ID {idD} not in metadata')
         finished = 0
         for future in concurrent.futures.as_completed(futures):
             finished += 1

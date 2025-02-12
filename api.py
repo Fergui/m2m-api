@@ -195,12 +195,18 @@ class M2M(object):
         if not len(filterOptions):
             filterOptions = {'downloadSystem': lambda x: x in ['dds', 'ls_zip'], 'available': lambda x: x}
         labels = [label]
-        downloadOptions = self.downloadOptions(datasetName, filterOptions, listId=label, includeSecondaryFileGroups=False)
-        downloads = [{'entityId' : product['entityId'], 'productId' : product['id']} for product in downloadOptions]
+        downloadOptions = self.downloadOptions(
+            datasetName, filterOptions, listId=label, includeSecondaryFileGroups=False
+        )
+        downloads = [
+            {
+                'entityId' : product['entityId'], 'productId' : product['id']
+            } for product in downloadOptions
+        ]
         requestedDownloadsCount = len(downloads)
         if requestedDownloadsCount:
             logging.info('M2M.retrieveScenes - Requested downloads count={}'.format(requestedDownloadsCount))
-            requestResults = self.downloadRequest(downloads)
+            requestResults = self.downloadRequest(downloads, label=label)
             if len(requestResults['duplicateProducts']):
                 for product in requestResults['duplicateProducts'].values():
                     if product not in labels:
@@ -232,6 +238,7 @@ class M2M(object):
             logging.info('M2M.retrieveScenes - No download options found')
         for label in labels:
             self.downloadOrderRemove(label)
+            self.sceneListRemove(label)
         return downloadMeta
 
     def logout(self):
